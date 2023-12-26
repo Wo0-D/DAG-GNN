@@ -23,105 +23,105 @@ from modules import *
 
 parser = argparse.ArgumentParser()
 
-# -----------data parameters ------
+# -----------data parameters ------         数据参数
 # configurations
 parser.add_argument('--data_type', type=str, default='synthetic',
                     choices=['synthetic', 'discrete', 'real'],
-                    help='choosing which experiment to do.')
+                    help='choosing which experiment to do.')                # 选择做什么实验：合成、离散、真实
 parser.add_argument('--data_filename', type=str, default='alarm',
-                    help='data file name containing the discrete files.')
+                    help='data file name containing the discrete files.')   # 包含离散文件的数据文件名
 parser.add_argument('--data_dir', type=str, default='data/',
-                    help='data file name containing the discrete files.')
+                    help='data file name containing the discrete files.')   # 包含离散文件的数据文件路径
 parser.add_argument('--data_sample_size', type=int, default=5000,
-                    help='the number of samples of data')
+                    help='the number of samples of data')                   # 数据的样本数量
 parser.add_argument('--data_variable_size', type=int, default=10,
-                    help='the number of variables in synthetic generated data')
+                    help='the number of variables in synthetic generated data') # 生成合成数据中的变量数量
 parser.add_argument('--graph_type', type=str, default='erdos-renyi',
-                    help='the type of DAG graph by generation method')
+                    help='the type of DAG graph by generation method')      # 生成DAG图的方法类型
 parser.add_argument('--graph_degree', type=int, default=2,
-                    help='the number of degree in generated DAG graph')
+                    help='the number of degree in generated DAG graph')     # 生成的DAG图的度数
 parser.add_argument('--graph_sem_type', type=str, default='linear-gauss',
-                    help='the structure equation model (SEM) parameter type')
-parser.add_argument('--graph_linear_type', type=str, default='nonlinear_2',
+                    help='the structure equation model (SEM) parameter type')   # SEM的参数类型
+parser.add_argument('--graph_linear_type', type=str, default='nonlinear_2',     # 合成数据类型：
                     help='the synthetic data type: linear -> linear SEM, nonlinear_1 -> x=Acos(x+1)+z, nonlinear_2 -> x=2sin(A(x+0.5))+A(x+0.5)+z')
 parser.add_argument('--edge-types', type=int, default=2,
-                    help='The number of edge types to infer.')
+                    help='The number of edge types to infer.')              # 要推断的边缘类型数量
 parser.add_argument('--x_dims', type=int, default=1,  # changed here
-                    help='The number of input dimensions: default 1.')
-parser.add_argument('--z_dims', type=int, default=1,
+                    help='The number of input dimensions: default 1.')      # 输入的维数
+parser.add_argument('--z_dims', type=int, default=1,                        # 潜在变量维数：默认值与变量大小相同
                     help='The number of latent variable dimensions: default the same as variable size.')
 
-# -----------training hyperparameters
+# -----------training hyperparameters           训练超参数
 parser.add_argument('--optimizer', type=str, default='Adam',
-                    help='the choice of optimizer used')
+                    help='the choice of optimizer used')                    # 选用的优化器
 parser.add_argument('--graph_threshold', type=float, default=0.3,  # 0.3 is good, 0.2 is error prune
-                    help='threshold for learned adjacency matrix binarization')
+                    help='threshold for learned adjacency matrix binarization')     # 学习邻接矩阵二值化的阈值
 parser.add_argument('--tau_A', type=float, default=0.0,
-                    help='coefficient for L-1 norm of A.')
+                    help='coefficient for L-1 norm of A.')                  # A 的 L-1 准则系数
 parser.add_argument('--lambda_A', type=float, default=0.,
-                    help='coefficient for DAG constraint h(A).')
+                    help='coefficient for DAG constraint h(A).')            # DAG 约束条件 h(A) 的系数
 parser.add_argument('--c_A', type=float, default=1,
-                    help='coefficient for absolute value h(A).')
+                    help='coefficient for absolute value h(A).')            # h(A) 绝对值 的系数
 parser.add_argument('--use_A_connect_loss', type=int, default=0,
-                    help='flag to use A connect loss')
+                    help='flag to use A connect loss')                      # 选择 A 连接损失的标志
 parser.add_argument('--use_A_positiver_loss', type=int, default=0,
-                    help='flag to enforce A must have positive values')
+                    help='flag to enforce A must have positive values')     # 强制 A 未正值的标志
 
 parser.add_argument('--no-cuda', action='store_true', default=True,
-                    help='Disables CUDA training.')
-parser.add_argument('--seed', type=int, default=42, help='Random seed.')
+                    help='Disables CUDA training.')                         # 禁用 CUDA 训练
+parser.add_argument('--seed', type=int, default=42, help='Random seed.')    # 随即种子
 parser.add_argument('--epochs', type=int, default=300,
-                    help='Number of epochs to train.')
+                    help='Number of epochs to train.')                      # 训练的 epochs 数
 parser.add_argument('--batch-size', type=int, default=100,
                     # note: should be divisible by sample size, otherwise throw an error
-                    help='Number of samples per batch.')
+                    help='Number of samples per batch.')                    # 每次 batch 的样本数
 parser.add_argument('--lr', type=float, default=3e-3,  # basline rate = 1e-3
-                    help='Initial learning rate.')
+                    help='Initial learning rate.')                          # 初始 lr
 parser.add_argument('--encoder-hidden', type=int, default=64,
-                    help='Number of hidden units.')
+                    help='Number of hidden units.')                         # encoder 中的隐藏单元的数量
 parser.add_argument('--decoder-hidden', type=int, default=64,
-                    help='Number of hidden units.')
+                    help='Number of hidden units.')                         # decoder 中的隐藏单元的数量
 parser.add_argument('--temp', type=float, default=0.5,
-                    help='Temperature for Gumbel softmax.')
+                    help='Temperature for Gumbel softmax.')                 # Gumbel softmax 的温度
 parser.add_argument('--k_max_iter', type=int, default=1e2,
-                    help='the max iteration number for searching lambda and c')
+                    help='the max iteration number for searching lambda and c')     # 搜索 lambda 和 c 的最大迭代次数
 
 parser.add_argument('--encoder', type=str, default='mlp',
-                    help='Type of path encoder model (mlp, or sem).')
+                    help='Type of path encoder model (mlp, or sem).')       # 路径 encoder 模型的类型（mlp，或 SEM）
 parser.add_argument('--decoder', type=str, default='mlp',
-                    help='Type of decoder model (mlp, or sim).')
+                    help='Type of decoder model (mlp, or sim).')            # decoder 模型的类型（mlp，或 SEM）
 parser.add_argument('--no-factor', action='store_true', default=False,
-                    help='Disables factor graph model.')
+                    help='Disables factor graph model.')                    # 禁用因子图模型
 parser.add_argument('--suffix', type=str, default='_springs5',
-                    help='Suffix for training data (e.g. "_charged".')
+                    help='Suffix for training data (e.g. "_charged".')      # 训练数据的后缀（例如"_charged）
 parser.add_argument('--encoder-dropout', type=float, default=0.0,
-                    help='Dropout rate (1 - keep probability).')
+                    help='Dropout rate (1 - keep probability).')            # encoder 的 dropout 率
 parser.add_argument('--decoder-dropout', type=float, default=0.0,
-                    help='Dropout rate (1 - keep probability).')
+                    help='Dropout rate (1 - keep probability).')            # decoder 的 dropout 率
 parser.add_argument('--save-folder', type=str, default='logs',
-                    help='Where to save the trained model, leave empty to not save anything.')
+                    help='Where to save the trained model, leave empty to not save anything.')      # 训练好模型的保存位置，留空不保存
 parser.add_argument('--load-folder', type=str, default='',
                     help='Where to load the trained model if finetunning. ' +
-                         'Leave empty to train from scratch')
+                         'Leave empty to train from scratch')               # 如果要 finetunning，从哪里加载训练好的模型，留空从头开始培训
 
 parser.add_argument('--h_tol', type=float, default=1e-8,
-                    help='the tolerance of error of h(A) to zero')
+                    help='the tolerance of error of h(A) to zero')          # h(A) 的误差对零的容许度
 parser.add_argument('--prediction-steps', type=int, default=10, metavar='N',
-                    help='Num steps to predict before re-using teacher forcing.')
+                    help='Num steps to predict before re-using teacher forcing.')   # 重复使用教师资源前需要预测的若干步骤
 parser.add_argument('--lr-decay', type=int, default=200,
-                    help='After how epochs to decay LR by a factor of gamma.')
+                    help='After how epochs to decay LR by a factor of gamma.')      # 经过多少个 epochs 之后，LR 的衰变系数为伽马
 parser.add_argument('--gamma', type=float, default=1.0,
-                    help='LR decay factor.')
+                    help='LR decay factor.')                                # LR 衰变系数
 parser.add_argument('--skip-first', action='store_true', default=False,
-                    help='Skip first edge type in decoder, i.e. it represents no-edge.')
+                    help='Skip first edge type in decoder, i.e. it represents no-edge.')    # 在 decoder 中跳过最初的边类型
 parser.add_argument('--var', type=float, default=5e-5,
-                    help='Output variance.')
+                    help='Output variance.')                                # 输出参数
 parser.add_argument('--hard', action='store_true', default=False,
-                    help='Uses discrete samples in training forward pass.')
+                    help='Uses discrete samples in training forward pass.')     # 在训练前向传播时使用离散样本
 parser.add_argument('--prior', action='store_true', default=False,
-                    help='Whether to use sparsity prior.')
+                    help='Whether to use sparsity prior.')                  # 是否使用稀疏先验
 parser.add_argument('--dynamic-graph', action='store_true', default=False,
-                    help='Whether test with dynamically re-computed graph.')
+                    help='Whether test with dynamically re-computed graph.')    # 是否使用动态重计算图来测试
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -135,7 +135,7 @@ if args.cuda:
 if args.dynamic_graph:
     print("Testing with dynamically re-computed graph.")
 
-# Save model and meta-data. Always saves in a new sub-folder.
+# Save model and meta-data. Always saves in a new sub-folder.               # 保存模型和元数据，总是在一个新的文件夹保存
 if args.save_folder:
     exp_counter = 0
     now = datetime.datetime.now()
@@ -225,7 +225,7 @@ elif args.optimizer == 'SGD':
 scheduler = lr_scheduler.StepLR(optimizer, step_size=args.lr_decay,
                                 gamma=args.gamma)
 
-# Linear indices of an upper triangular mx, used for acc calculation
+# Linear indices of an upper triangular mx, used for acc calculation        # 上三角 mx 的线性指数，用于 acc 计算
 triu_indices = get_triu_offdiag_indices(args.data_variable_size)
 tril_indices = get_tril_offdiag_indices(args.data_variable_size)
 
@@ -331,20 +331,20 @@ def train(epoch, best_val_loss, ground_truth_G, lambda_A, c_A, optimizer):
         preds = output
         variance = 0.
 
-        # reconstruction accuracy loss
+        # reconstruction accuracy loss                              # 重构准确度 损失
         loss_nll = nll_gaussian(preds, target, variance)
 
-        # KL loss
+        # KL loss                                                   # KL 散度损失
         loss_kl = kl_gaussian_sem(logits)
 
-        # ELBO loss:
+        # ELBO loss:                                                # ELBO 置信下界 损失
         loss = loss_kl + loss_nll
 
-        # add A loss
+        # add A loss                                                # A 损失
         one_adj_A = origin_A  # torch.mean(adj_A_tilt_decoder, dim =0)
         sparse_loss = args.tau_A * torch.sum(torch.abs(one_adj_A))
 
-        # other loss term
+        # other loss term                                           # 其他损失项
         if args.use_A_connect_loss:
             connect_gap = A_connect_loss(one_adj_A, args.graph_threshold, z_gap)
             loss += lambda_A * connect_gap + 0.5 * c_A * connect_gap * connect_gap
@@ -353,7 +353,7 @@ def train(epoch, best_val_loss, ground_truth_G, lambda_A, c_A, optimizer):
             positive_gap = A_positive_loss(one_adj_A, z_positive)
             loss += .1 * (lambda_A * positive_gap + 0.5 * c_A * positive_gap * positive_gap)
 
-        # compute h(A)
+        # compute h(A)                                              # 无环约束 h(A)
         h_A = _h_A(origin_A, args.data_variable_size)
         loss += lambda_A * h_A + 0.5 * c_A * h_A * h_A + 100. * torch.trace(
             origin_A * origin_A) + sparse_loss  # +  0.01 * torch.sum(variance * variance)
@@ -435,7 +435,7 @@ try:
             for epoch in range(args.epochs):
                 ELBO_loss, NLL_loss, MSE_loss, graph, origin_A = train(epoch, best_ELBO_loss, ground_truth_G, lambda_A,
                                                                        c_A, optimizer)
-                if ELBO_loss < best_ELBO_loss:
+                if ELBO_loss < best_ELBO_loss:          # 更新全局最优解
                     best_ELBO_loss = ELBO_loss
                     best_epoch = epoch
                     best_ELBO_graph = graph
@@ -452,7 +452,7 @@ try:
 
             print("Optimization Finished!")
             print("Best Epoch: {:04d}".format(best_epoch))
-            if ELBO_loss > 2 * best_ELBO_loss:
+            if ELBO_loss > 2 * best_ELBO_loss:          # 过拟合？
                 break
 
             # update parameters
@@ -464,7 +464,7 @@ try:
                 break
 
             # update parameters
-            # h_A, adj_A are computed in loss anyway, so no need to store
+            # h_A, adj_A are computed in loss anyway, so no need to store  计算 loss 时已经计算过，因此不用存储
         h_A_old = h_A_new.item()
         lambda_A += c_A * h_A_new.item()
 
@@ -508,8 +508,8 @@ try:
     print('threshold 0.3, Accuracy: fdr', fdr, ' tpr ', tpr, ' fpr ', fpr, 'shd', shd, 'nnz', nnz)
 
 
-except KeyboardInterrupt:
-    # print the best anway
+except KeyboardInterrupt:       # 键盘强制结束运行 CTRL+C
+    # print the best anyway
     print(best_ELBO_graph)
     print(nx.to_numpy_array(ground_truth_G))
     fdr, tpr, fpr, shd, nnz = count_accuracy(ground_truth_G, nx.DiGraph(best_ELBO_graph))

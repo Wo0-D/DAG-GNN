@@ -25,16 +25,16 @@ def simulate_random_dag(d: int,
                         degree: float,
                         graph_type: str,
                         w_range: tuple = (0.5, 2.0)) -> nx.DiGraph:
-    """Simulate random DAG with some expected degree.
+    """Simulate random DAG with some expected degree.    模拟含有固定度数的随机DAG
 
     Args:
         d: number of nodes
-        degree: expected node degree, in + out
+        degree: expected node degree, in + out           节点的总度数
         graph_type: {erdos-renyi, barabasi-albert, full}
         w_range: weight range +/- (low, high)
 
     Returns:
-        G: weighted DAG
+        G: weighted DAG                                  带权重的 DAG
     """
     if graph_type == 'erdos-renyi':
         prob = float(degree) / (d - 1)
@@ -68,7 +68,7 @@ def simulate_sem(G: nx.DiGraph,
                  sem_type: str,
                  linear_type: str,
                  noise_scale: float = 1.0) -> np.ndarray:
-    """Simulate samples from SEM with specified type of noise.
+    """Simulate samples from SEM with specified type of noise.      模拟带有制定类型噪声的 SEM 采样
 
     Args:
         G: weigthed DAG
@@ -135,17 +135,17 @@ def count_accuracy(G_true: nx.DiGraph,
                    G: nx.DiGraph,
                    G_und: nx.DiGraph = None) -> tuple:
     """Compute FDR, TPR, and FPR for B, or optionally for CPDAG B + B_und.
-
+       计算准确度
     Args:
         G_true: ground truth graph
         G: predicted graph
         G_und: predicted undirected edges in CPDAG, asymmetric
 
     Returns:
-        fdr: (reverse + false positive) / prediction positive
-        tpr: (true positive) / condition positive
+        fdr: (reverse + false positive) / prediction positive       错误发现率
+        tpr: (true positive) / condition positive                   
         fpr: (reverse + false positive) / condition negative
-        shd: undirected extra + undirected missing + reverse
+        shd: undirected extra + undirected missing + reverse        结构汉明距离
         nnz: prediction positive
     """
     B_true = nx.to_numpy_array(G_true) != 0
